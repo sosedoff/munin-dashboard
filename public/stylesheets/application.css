@@ -1,0 +1,10 @@
+*{margin:0;padding:0;}
+ol,ul,li{margin:0;padding:0;list-style:none;list-style-type:none;}
+table{border-collapse:collapse;}
+.clear{clear:both;}
+.f-left{float:left;}
+.f-right{float:right;}
+.hidden{display:none !important;}
+html,body{background:#313436;}
+body{font-family:'Lucida Grande',Verdana,Arial,Helvetica,sans-serif;font-size:12px;}
+.header-wrapper{height:40px;overflow:hidden;background:#515456;border-bottom:1px solid #111416;}.header-wrapper .header{padding:0px 12px;height:40px;}.header-wrapper .header a.logo{font-size:16px;color:#bbb;text-decoration:none;text-shadow:#000 0px 1px 0px;line-height:40px;}.header-wrapper .header a.logo:hover{color:#ccc;}
