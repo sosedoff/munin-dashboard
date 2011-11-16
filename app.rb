@@ -100,7 +100,7 @@ get '/api/monitor/:name' do
   json_response(@monitor)
 end
 
-get '/api/servers/:name/monitor' do
+post'/api/monitor/:name' do
   find_server
   
   if $monitors.key?(@server.name)
