@@ -1,4 +1,7 @@
 class Monitor
+  KEY_CONFIG = 'munin_config'
+  KEY_FETCH  = 'munin_fetch'
+  
   attr_reader :uuid       # Worker UUID
   attr_reader :status     # Process status
   attr_reader :pid        # Process ID
@@ -38,14 +41,25 @@ class Monitor
     @status = 'running'
     @pid = fork do
       storage = Redis.new
+      
+      # Store current configuration
+      storage.hset(
+        KEY_CONFIG,
+        @server.name,
+        @node.config(services)
+      )
+      
       loop do
         trap 'TERM' do
-          storage.hdel('munin_monitor', @server.name)
+          # Cleanup redis keys
+          storage.hdel(KEY_CONFIG, @server.name)
+          storage.hdel(KEY_FETCH, @server.name)
+          
           @status = 'stopped'
           Process.exit!
         end
         data = @node.fetch(services)
-        storage.hset('munin_monitor', @server.name, data.to_json)
+        storage.hset(KEY_FETCH, @server.name, data.to_json)
         sleep(@period)
       end
     end
