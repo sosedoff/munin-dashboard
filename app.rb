@@ -48,6 +48,7 @@ before do
 end
 
 $monitors = {}
+$redis = Redis.new
 
 get '/' do
   erb :index
@@ -125,6 +126,11 @@ end
 get '/api/monitor/:name/start' do
   find_server
   find_monitor
+  
+  if @monitor.running?
+    halt 400, json_response(:error => "Monitor is already running")
+  end
+  
   @monitor.start
   json_response(@monitor)
 end
@@ -132,6 +138,33 @@ end
 get '/api/monitor/:name/stop' do
   find_server
   find_monitor
+  
+  unless @monitor.running?
+    halt 400, json_response(:error => "Monitor is not running")
+  end
+  
   @monitor.stop
   json_response(@monitor)
+end
+
+get '/api/monitor/:name/config' do
+  find_server
+  find_monitor
+  
+  unless @monitor.running?
+    halt 400, json_response(:error => "Monitor is not running")
+  end
+  
+  $redis.hget(Monitor::KEY_CONFIG, @server.name)
+end
+
+get '/api/monitor/:name/fetch' do
+  find_server
+  find_monitor
+  
+  unless @monitor.running?
+    halt 400, json_response(:error => "Monitor is not running")
+  end
+  
+  $redis.hget(Monitor::KEY_FETCH, @server.name)
 end
