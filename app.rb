@@ -29,7 +29,14 @@ helpers do
   def find_server
     @server = Server.find_by_name(params[:name])
     if @server.nil?
-      halt 404, json_response('Server not found')
+      halt 404, json_response(:error => 'Server not found')
+    end
+  end
+  
+  def find_monitor
+    @monitor = $monitors[@server.name]
+    if @monitor.nil?
+      halt 404, json_response(:error => 'Monitor for this server was not found')
     end
   end
 end
@@ -39,6 +46,8 @@ before do
     content_type :json, :encoding => 'utf-8'
   end
 end
+
+$monitors = {}
 
 get '/' do
   erb :index
@@ -79,4 +88,44 @@ delete '/api/servers/:name' do
   find_server
   @server.destroy
   json_response(:destroyed => @server.destroyed?)
+end
+
+get '/api/monitors' do
+  json_response($monitors)
+end
+
+get '/api/servers/:name/monitor' do
+  find_server
+  
+  if $monitors.key?(@server.name)
+    halt 400, json_response(:error => "already exists")
+  end
+  
+  services = params[:services]
+  period   = (params[:period] || 3).to_i
+  
+  unless services.kind_of?(Array)
+    halt 400, json_response(:error => "services parameter required")
+  end
+  
+  unless (1..10).include?(period)
+    halt 400, json_response(:error => "period should be in [1..10] range")
+  end
+  
+  $monitors[@server.name] = Monitor.new(@server, services, period)
+  json_response($monitors[@server.name])
+end
+
+get '/api/monitor/:name/start' do
+  find_server
+  find_monitor
+  @monitor.start
+  json_response(@monitor)
+end
+
+get '/api/monitor/:name/stop' do
+  find_server
+  find_monitor
+  @monitor.stop
+  json_response(@monitor)
 end

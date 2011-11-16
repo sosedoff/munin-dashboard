@@ -3,12 +3,13 @@ class Monitor
   attr_reader :status     # Process status
   attr_reader :pid        # Process ID
   attr_reader :services   # List of monitored services
+  attr_reader :period     # Update frequency (seconds)
   
   # Initialize a new Monitor instance
   #
   # server - Server instance
   #
-  def initialize(server)
+  def initialize(server, services, period=3)
     unless server.kind_of?(Server)
       raise ArgumentError, "Server required."
     end
@@ -18,7 +19,8 @@ class Monitor
     @node     = @server.node
     @pid      = nil
     @status   = 'stopped'
-    @services = []
+    @services = services
+    @period   = period
   end
   
   # Returns true if the monitor is running
@@ -29,7 +31,7 @@ class Monitor
   
   # Start monitor process
   #
-  def start(services=[])
+  def start
     raise RuntimeError, "Already running" if running?
     raise RuntimeError, "No services defined" if services.empty?
     
@@ -44,7 +46,7 @@ class Monitor
         end
         data = @node.fetch(services)
         storage.hset('munin_monitor', @server.name, data.to_json)
-        sleep(1)
+        sleep(@period)
       end
     end
     Process.detach(@pid)
@@ -66,6 +68,6 @@ class Monitor
   end
   
   def as_json(options={})
-    {'uuid' => @uuid, 'status' => @status}
+    {'uuid' => uuid, 'services' => services, 'status' => status}
   end
 end
