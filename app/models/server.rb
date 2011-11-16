@@ -31,7 +31,7 @@ class Server
   
   # Discover all services on the node
   #
-  def services
+  def node_services
     node.list
   end
   

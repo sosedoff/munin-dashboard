@@ -57,7 +57,7 @@ post '/api/servers' do
   if server.save
     json_response server
   else
-    halt 400, :errors => server.errors
+    halt 400, json_response(:errors => server.errors)
   end
 end
 
