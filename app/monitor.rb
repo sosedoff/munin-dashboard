@@ -82,6 +82,11 @@ class Monitor
   end
   
   def as_json(options={})
-    {'uuid' => uuid, 'services' => services, 'status' => status}
+    {
+      'uuid'     => uuid,
+      'services' => services,
+      'period'   => period,
+      'status'   => status
+    }
   end
 end
