@@ -94,6 +94,12 @@ get '/api/monitors' do
   json_response($monitors)
 end
 
+get '/api/monitor/:name' do
+  find_server
+  find_monitor
+  json_response(@monitor)
+end
+
 get '/api/servers/:name/monitor' do
   find_server
   
